@@ -1,0 +1,27 @@
+Using FreeRTOS
+-> Construct a task to display a counter that counts every ½ second from 42 to
+    00 and then from 00 to 42.
+    + Think of using a queue to communicate between tasks.
+-> Blink the D13 LED on each count NOT USING DELAY! Write a task to do this and
+    communicate this task from the counter task.
+    + Semaphores or queues can work for this.
+
+As you see in the schematics, both 7 segment LEDs are controlled by the same
+D0-D7 data pins. That means to see both digits, we must multiplex the displays.
+The Test program for the 7 Segment program will give you the data pins (plus it
+is ALL ON THE SCHEMATIC).
+
+-> Multiplex the 7 segment displays.
+    + Build two additional tasks to do this. One to display the left digit of
+    the display and one to display the right digit.
+    + Alternate between tasks over 30 times a second to allow the mind to see
+    two digits light up.
+    - How to synchronize the tasks? Semaphore?
+
+Write up Required
+-> Two page description of your program, specifically describing tasks.
+-> A block diagram showing your program architecture.
+    + YOU MUST HAVE ALL YOUR TASKS ON THE BLOCK DIAGRAM WITH PRIORITY NOTED!
+-> Source code.
+-> Video submission of software and verbal description of your program (short).
+    + MUST INCLUDE a piece of paper with the date and your name in the video!
