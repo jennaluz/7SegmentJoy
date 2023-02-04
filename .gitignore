@@ -1,2 +1,6 @@
+# directories
 build/
 test/
+
+# files
+.DS_STORE
