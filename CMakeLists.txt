@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.12)
 set(PICO_BOARD adafruit_feather_rp2040)
 include(pico_sdk_import.cmake)
 
-project(rtos_try_again)
+project(7SegmentJoy LANGUAGES C CXX ASM)
 
 pico_sdk_init()
 
@@ -23,18 +23,18 @@ add_library(freertos
 )
 
 target_include_directories(freertos PUBLIC
-    .
+    include/public
+    include/private
     ${PICO_SDK_FREERTOS_SOURCE}/include
     ${PICO_SDK_FREERTOS_SOURCE}/portable/GCC/ARM_CM0
 )
 
+file(GLOB SOURCE_FILES source/*.c)
 
-add_executable(7SegmentJoy
-    7SegmentJoy.c
-)
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCE_FILES})
 
-pico_enable_stdio_usb(7SegmentJoy 1)
-pico_enable_stdio_uart(7SegmentJoy 1)
+pico_enable_stdio_usb(${CMAKE_PROJECT_NAME} 1)
+pico_enable_stdio_uart(${CMAKE_PROJECT_NAME} 1)
 
-target_link_libraries(7SegmentJoy pico_stdlib freertos)
-pico_add_extra_outputs(7SegmentJoy)
+target_link_libraries(${CMAKE_PROJECT_NAME} pico_stdlib freertos)
+pico_add_extra_outputs(${CMAKE_PROJECT_NAME})

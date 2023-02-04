@@ -18,6 +18,9 @@ is ALL ON THE SCHEMATIC).
     two digits light up.
     - How to synchronize the tasks? Semaphore?
 
+    + CC1 = tens digit & CC2 = ones digit.
+    + send 0 to drive the signal.
+
 Write up Required
 -> Two page description of your program, specifically describing tasks.
 -> A block diagram showing your program architecture.
