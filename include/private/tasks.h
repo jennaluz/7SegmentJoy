@@ -7,3 +7,6 @@
 #pragma once
 
 void vCounter();
+void vBlinkD13();
+void vOnesDigit();
+void vTensDigit();
