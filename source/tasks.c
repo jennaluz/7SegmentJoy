@@ -14,7 +14,6 @@
 /*private*/
 #include "tasks.h"
 #include "7SegmentPins.h"
-#include "digitConfig.h"
 
 extern QueueHandle_t qBlink;
 extern QueueHandle_t qOnesCount;
@@ -173,7 +172,7 @@ void vOnesDigit()
             xSemaphoreGive(m7SegmentDisplay);
         }
 
-        vTaskDelay(0.5);
+        vTaskDelay(0);
     }
 }
 
@@ -270,6 +269,6 @@ void vTensDigit()
             xSemaphoreGive(m7SegmentDisplay);
         }
 
-        vTaskDelay(0.5);
+        vTaskDelay(0);
     }
 }
