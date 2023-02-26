@@ -1,5 +1,8 @@
 # directories
 build/
+docs/
+test/
 
 # files
 .DS_STORE
+*.zip

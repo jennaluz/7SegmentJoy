@@ -61,7 +61,7 @@ void vCounter()
 void vBlinkD13()
 {
     const int xBlinkDelay = 0.3 * configTICK_RATE_HZ;
-    bool bBlink;
+    bool bBlink = false;
 
     while (true) {
         xQueueReceive(qBlink, &bBlink, 0);
@@ -74,7 +74,7 @@ void vBlinkD13()
             bBlink = false;
         }
 
-        vTaskDelay(0);
+        taskYIELD();
     }
 }
 
@@ -172,7 +172,7 @@ void vOnesDigit()
             xSemaphoreGive(m7SegmentDisplay);
         }
 
-        vTaskDelay(0);
+        taskYIELD();
     }
 }
 
@@ -269,6 +269,6 @@ void vTensDigit()
             xSemaphoreGive(m7SegmentDisplay);
         }
 
-        vTaskDelay(0);
+        taskYIELD();
     }
 }
