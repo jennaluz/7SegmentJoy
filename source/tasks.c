@@ -1,7 +1,7 @@
 /*
  * source/tasks.c
  *
- * defines all tasks created in source/main.c.
+ * Defines all tasks created in source/main.c.
  */
 
 #include <FreeRTOS.h>
@@ -19,76 +19,96 @@ extern QueueHandle_t qBlink;
 extern QueueHandle_t qOnesCount;
 extern QueueHandle_t qTensCount;
 
-extern SemaphoreHandle_t m7SegmentDisplay;
+extern SemaphoreHandle_t s7SegmentDisplay;
 
+/*
+ * Stores the current count value.
+ * Sends the one's and ten's place over queues to be received by the appropriate task.
+ * Signals when D13 should blink.
+ */
 void vCounter()
 {
-    const int xDelayHalfSecond = 0.5 * configTICK_RATE_HZ;
-    TickType_t xTicksToWait = 0;
-
     bool bBlink = true;
     uint uiCount = 0;
     uint uiOnes = 0;
     uint uiTens = 0;
 
     while (true) {
+        // count down from 42 to 00
         for (uiCount = 42; uiCount > 0; uiCount--) {
+            // store uiCount place values
             uiOnes = uiCount % 10;
             uiTens = uiCount / 10;
 
-            //printf("%d %d %d\n", uiCount, uiTens, uiOnes);
-            xQueueSend(qBlink, &bBlink, xTicksToWait);
-            xQueueSend(qOnesCount, &uiOnes, xTicksToWait);
-            xQueueSend(qTensCount, &uiTens, xTicksToWait);
+            // send data to queues
+            xQueueSend(qBlink, &bBlink, 0);
+            xQueueSend(qOnesCount, &uiOnes, 0);
+            xQueueSend(qTensCount, &uiTens, 0);
 
-            vTaskDelay(xDelayHalfSecond);
+            // delay half a second
+            vTaskDelay(0.5 * configTICK_RATE_HZ);
         }
 
+        // count up from 42 to 00
         for (uiCount = 0; uiCount < 42; uiCount++) {
+            // store uiCount place values
             uiOnes = uiCount % 10;
             uiTens = uiCount / 10;
 
-            //printf("%d %d %d\n", uiCount, uiTens, uiOnes);
-            xQueueSend(qOnesCount, &uiOnes, xTicksToWait);
-            xQueueSend(qTensCount, &uiTens, xTicksToWait);
-            xQueueSend(qBlink, &bBlink, xTicksToWait);
+            // send data to queues
+            xQueueSend(qOnesCount, &uiOnes, 0);
+            xQueueSend(qTensCount, &uiTens, 0);
+            xQueueSend(qBlink, &bBlink, 0);
 
-            vTaskDelay(xDelayHalfSecond);
+            // delay half a second
+            vTaskDelay(0.5 * configTICK_RATE_HZ);
         }
     }
 }
 
+/*
+ * Waits for signal over qBlink to blink D13 LED.
+ */
 void vBlinkD13()
 {
-    const int xBlinkDelay = 0.3 * configTICK_RATE_HZ;
     bool bBlink = false;
 
     while (true) {
+        // receive data from queue
         xQueueReceive(qBlink, &bBlink, 0);
 
+        // blink D13 LED
         if (bBlink) {
             gpio_put(LED_PIN, 1);
-            vTaskDelay(xBlinkDelay);
+            vTaskDelay(0.3 * configTICK_RATE_HZ);
             gpio_put(LED_PIN, 0);
 
             bBlink = false;
         }
 
+        // give up processor time
         taskYIELD();
     }
 }
 
+/*
+ * Uses s7SegmentDisplay to displays the one's place of the current count.
+ * Receives data over qOnesPlace.
+ */
 void vOnesDigit()
 {
     uint uiDigit = 2;
 
     while (true) {
-            // take m7SegmentDisplay mutex
-        if (xSemaphoreTake(m7SegmentDisplay, 0) == pdTRUE) {
+        // take s7SegmentDisplay mutex
+        if (xSemaphoreTake(s7SegmentDisplay, 0) == pdTRUE) {
+            // receive data from queue
             xQueueReceive(qOnesCount, &uiDigit, 0);
 
+            // turn off tens digit display
             gpio_put(SEVENSEG_CC1, 1);
 
+            // reset all segments
             gpio_put(SEVENSEG_A, 0);
             gpio_put(SEVENSEG_B, 0);
             gpio_put(SEVENSEG_C, 0);
@@ -97,6 +117,7 @@ void vOnesDigit()
             gpio_put(SEVENSEG_F, 0);
             gpio_put(SEVENSEG_G, 0);
 
+            // config digit segments
             switch (uiDigit) {
                 case 0:
                     gpio_put(SEVENSEG_A, 1);
@@ -168,24 +189,34 @@ void vOnesDigit()
                     break;
             }
 
+            // turn on ones digit display
             gpio_put(SEVENSEG_CC2, 0);
-            xSemaphoreGive(m7SegmentDisplay);
+            xSemaphoreGive(s7SegmentDisplay);
         }
 
+        // give up processor time
         taskYIELD();
     }
 }
 
+/*
+ * Uses s7SegmentDisplay to displays the ten's place of the current count.
+ * Receives data over qTensPlace.
+ */
 void vTensDigit()
 {
     uint uiDigit = 4;
 
     while (true) {
-        if (xSemaphoreTake(m7SegmentDisplay, 0) == pdTRUE) {
+        // take s7SegmentDisplay
+        if (xSemaphoreTake(s7SegmentDisplay, 0) == pdTRUE) {
+            // receive data from queue
             xQueueReceive(qTensCount, &uiDigit, 0);
 
+            // turn off ones digit display
             gpio_put(SEVENSEG_CC2, 1);
 
+            // reset all segments
             gpio_put(SEVENSEG_A, 0);
             gpio_put(SEVENSEG_B, 0);
             gpio_put(SEVENSEG_C, 0);
@@ -194,6 +225,7 @@ void vTensDigit()
             gpio_put(SEVENSEG_F, 0);
             gpio_put(SEVENSEG_G, 0);
 
+            // config digit segments
             switch (uiDigit) {
                 case 0:
                     gpio_put(SEVENSEG_A, 1);
@@ -265,10 +297,12 @@ void vTensDigit()
                     break;
             }
 
+            // turn on tens digit display
             gpio_put(SEVENSEG_CC1, 0);
-            xSemaphoreGive(m7SegmentDisplay);
+            xSemaphoreGive(s7SegmentDisplay);
         }
 
+        // give up processor time
         taskYIELD();
     }
 }

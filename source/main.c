@@ -1,3 +1,9 @@
+/*
+ * source/main.c
+ *
+ * Initializes all tasks, queues, a semaphore, and LED pins.
+ */
+
 #include <FreeRTOS.h>
 #include <stdio.h>
 #include <task.h>
@@ -13,7 +19,7 @@ QueueHandle_t qBlink = NULL;
 QueueHandle_t qOnesCount = NULL;
 QueueHandle_t qTensCount = NULL;
 
-SemaphoreHandle_t m7SegmentDisplay = NULL;
+SemaphoreHandle_t s7SegmentDisplay = NULL;
 
 int main()
 {
@@ -54,7 +60,8 @@ int main()
     qOnesCount = xQueueCreate(1, sizeof(uint));
     qTensCount = xQueueCreate(1, sizeof(uint));
 
-    m7SegmentDisplay = xSemaphoreCreateMutex();
+    s7SegmentDisplay = xSemaphoreCreateBinary();
+    xSemaphoreGive(s7SegmentDisplay);
 
     xTaskCreate(vCounter, "Counter", 256, NULL, 2, NULL);
     xTaskCreate(vBlinkD13, "Blink D13", 256, NULL, 1, NULL);
